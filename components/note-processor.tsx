@@ -8,6 +8,7 @@ import { Checkbox } from './ui/checkbox'
 import { ScrollArea } from './ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Copy, Loader2, Globe, Lock } from 'lucide-react'
+import { ThemeToggle } from './theme-toggle'
 
 interface ProcessedNotes {
   publicNote: string | null
@@ -108,13 +109,16 @@ export function NoteProcessor() {
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="border-b border-border px-6 py-4 shrink-0">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            kayDesk
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Transform draft notes into professional responses
-          </p>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              kayDesk
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Transform draft notes into professional responses
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
