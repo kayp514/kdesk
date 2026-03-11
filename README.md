@@ -1,33 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# aiDesk - Help Desk Note Processor
+
+aiDesk is a Next.js application that helps help desk agents transform their draft notes into professional public responses and detailed internal documentation using AI.
+
+## Features
+
+- **Draft Note Processing**: Input your draft notes and get professional outputs
+- **Dual Output**: Generates both public-facing customer responses and internal team documentation
+- **Google AI Integration**: Uses Google's Gemini AI for intelligent note processing
+- **Modern UI**: Built with Next.js 16, React 19, and shadcn/ui components
+- **Dark Mode Support**: Automatically adapts to your system's dark/light theme preference
+- **Secure API Key Storage**: API keys are stored in environment variables, not in the UI
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+## Prerequisites
+
+Before you begin, ensure you have:
+- Node.js (version 18 or higher)
+- A Google AI API key (get one from [Google AI Studio](https://aistudio.google.com/))
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ai-desk
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure your API key**
+
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local` and add your Google AI API key:
+   ```
+   GOOGLE_AI_API_KEY=your_actual_api_key_here
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+1. **Write your draft note**: Enter your rough draft in the text area
+2. **Click "Process Note"**: The AI will generate both public and internal versions
+3. **Copy the results**: Use the copy buttons to copy either the public or internal note
+
+> **Note**: The API key is now securely stored in environment variables, so you don't need to enter it in the UI.
+
+### Example
+
+**Draft Note:**
+```
+Customer having login issues. Reset password. Works now. Browser cache problem.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Public Note (AI-generated):**
+```
+Thank you for contacting support regarding your login difficulties. I've successfully reset your password, which has resolved the issue. The problem was caused by cached data in your browser. Your account is now working properly, and you should be able to log in without any further issues.
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Internal Note (AI-generated):**
+```
+Ticket Resolution: Customer login failure
+- Issue: User unable to authenticate
+- Root cause: Browser cache corruption preventing proper session handling
+- Action taken: Password reset via admin panel
+- Resolution: Login functionality restored
+- Follow-up: Advised customer on browser cache clearing procedures
+- Status: Resolved
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Technology Stack
 
-## Learn More
+- **Framework**: Next.js 16 with App Router
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **AI Integration**: Vercel AI SDK with Google AI provider
+- **Language**: TypeScript
 
-To learn more about Next.js, take a look at the following resources:
+## API Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `POST /api/process-note`: Processes draft notes and returns public/internal versions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development
+
+To contribute to this project:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## Deploy on Vercel
 
