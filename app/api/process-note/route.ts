@@ -1,4 +1,5 @@
-import { streamText, Output } from 'ai'
+import { streamObject } from 'ai'
+import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 
 export const maxDuration = 30
@@ -26,9 +27,9 @@ export async function POST(request: Request) {
   if (generatePublic) noteTypes.push('publicNote: A polished, professional customer-facing response')
   if (generateInternal) noteTypes.push('internalNote: A clear internal note for team documentation')
 
-  const result = streamText({
-    model: 'google/gemini-2.5-flash-preview-05-20',
-    output: Output.object({ schema: noteSchema }),
+  const result = streamObject({
+    model: google('gemini-2.0-flash'),
+    schema: noteSchema,
     prompt: `You are a professional help desk assistant. Transform the following draft note into structured notes.
 
 Draft note: "${draftNote}"

@@ -57,19 +57,45 @@ export function NoteProcessor() {
       if (!reader) throw new Error('No response body')
 
       const decoder = new TextDecoder()
-      let fullContent = ''
+      let buffer = ''
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        fullContent += decoder.decode(value, { stream: true })
+        buffer += decoder.decode(value, { stream: true })
 
+        // Parse streaming object chunks - AI SDK 4 sends partial JSON
         try {
-          const parsed = JSON.parse(fullContent)
-          setProcessedNotes(parsed)
+          // Try to extract the latest complete JSON object from the stream
+          const jsonMatch = buffer.match(/\{[^{}]*"publicNote"[^{}]*\}|\{[^{}]*"internalNote"[^{}]*\}/g)
+          if (jsonMatch) {
+            const lastMatch = jsonMatch[jsonMatch.length - 1]
+            const parsed = JSON.parse(lastMatch)
+            setProcessedNotes(prev => ({
+              publicNote: parsed.publicNote ?? prev?.publicNote ?? null,
+              internalNote: parsed.internalNote ?? prev?.internalNote ?? null,
+            }))
+          }
         } catch {
-          // Content is still streaming, continue
+          // Still accumulating data, try parsing the full buffer
+          try {
+            // AI SDK streamObject sends newline-delimited JSON chunks
+            const lines = buffer.trim().split('\n')
+            for (const line of lines) {
+              if (line.trim()) {
+                const parsed = JSON.parse(line)
+                if (parsed.publicNote !== undefined || parsed.internalNote !== undefined) {
+                  setProcessedNotes(prev => ({
+                    publicNote: parsed.publicNote ?? prev?.publicNote ?? null,
+                    internalNote: parsed.internalNote ?? prev?.internalNote ?? null,
+                  }))
+                }
+              }
+            }
+          } catch {
+            // Continue accumulating
+          }
         }
       }
     } catch (err) {
