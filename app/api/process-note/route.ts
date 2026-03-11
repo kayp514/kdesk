@@ -1,13 +1,6 @@
-import { streamObject } from 'ai'
-import { google } from '@ai-sdk/google'
-import { z } from 'zod'
+import { streamText } from 'ai'
 
 export const maxDuration = 30
-
-const noteSchema = z.object({
-  publicNote: z.string().nullable().describe('Customer-facing professional response'),
-  internalNote: z.string().nullable().describe('Internal team documentation'),
-})
 
 export async function POST(request: Request) {
   const { draftNote, generatePublic, generateInternal } = await request.json()
@@ -24,17 +17,16 @@ export async function POST(request: Request) {
   }
 
   const noteTypes = []
-  if (generatePublic) noteTypes.push('publicNote: A polished, professional customer-facing response')
-  if (generateInternal) noteTypes.push('internalNote: A clear internal note for team documentation')
+  if (generatePublic) noteTypes.push('- publicNote: A polished, professional customer-facing response')
+  if (generateInternal) noteTypes.push('- internalNote: A clear internal note for team documentation')
 
-  const result = streamObject({
-    model: google('gemini-2.0-flash'),
-    schema: noteSchema,
-    prompt: `You are a professional help desk assistant. Transform the following draft note into structured notes.
+  const result = streamText({
+    model: 'google/gemini-2.0-flash',
+    prompt: `You are a professional help desk assistant. Transform the following draft note into structured JSON.
 
 Draft note: "${draftNote}"
 
-Generate the following based on the draft:
+Generate a JSON object with the following fields:
 ${noteTypes.join('\n')}
 
 Rules:
@@ -43,7 +35,12 @@ Rules:
 - For internalNote: Write naturally like how a helpdesk agent documents issues for teammates.
 - Set any note type that wasn't requested to null.
 ${!generatePublic ? '- Set publicNote to null' : ''}
-${!generateInternal ? '- Set internalNote to null' : ''}`,
+${!generateInternal ? '- Set internalNote to null' : ''}
+
+IMPORTANT: Respond ONLY with valid JSON in this exact format:
+{"publicNote": "...", "internalNote": "..."}
+
+Do not include any markdown, code blocks, or explanations. Just the raw JSON object.`,
     abortSignal: request.signal,
   })
 

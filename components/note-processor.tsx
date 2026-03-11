@@ -57,45 +57,40 @@ export function NoteProcessor() {
       if (!reader) throw new Error('No response body')
 
       const decoder = new TextDecoder()
-      let buffer = ''
+      let fullText = ''
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
+        fullText += decoder.decode(value, { stream: true })
 
-        // Parse streaming object chunks - AI SDK 4 sends partial JSON
+        // Try to parse the accumulated text as JSON
         try {
-          // Try to extract the latest complete JSON object from the stream
-          const jsonMatch = buffer.match(/\{[^{}]*"publicNote"[^{}]*\}|\{[^{}]*"internalNote"[^{}]*\}/g)
+          // Clean up any markdown code blocks or extra text
+          let jsonText = fullText.trim()
+          if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.slice(7)
+          }
+          if (jsonText.startsWith('```')) {
+            jsonText = jsonText.slice(3)
+          }
+          if (jsonText.endsWith('```')) {
+            jsonText = jsonText.slice(0, -3)
+          }
+          jsonText = jsonText.trim()
+
+          // Try to find and parse JSON object
+          const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
           if (jsonMatch) {
-            const lastMatch = jsonMatch[jsonMatch.length - 1]
-            const parsed = JSON.parse(lastMatch)
-            setProcessedNotes(prev => ({
-              publicNote: parsed.publicNote ?? prev?.publicNote ?? null,
-              internalNote: parsed.internalNote ?? prev?.internalNote ?? null,
-            }))
+            const parsed = JSON.parse(jsonMatch[0])
+            setProcessedNotes({
+              publicNote: parsed.publicNote ?? null,
+              internalNote: parsed.internalNote ?? null,
+            })
           }
         } catch {
-          // Still accumulating data, try parsing the full buffer
-          try {
-            // AI SDK streamObject sends newline-delimited JSON chunks
-            const lines = buffer.trim().split('\n')
-            for (const line of lines) {
-              if (line.trim()) {
-                const parsed = JSON.parse(line)
-                if (parsed.publicNote !== undefined || parsed.internalNote !== undefined) {
-                  setProcessedNotes(prev => ({
-                    publicNote: parsed.publicNote ?? prev?.publicNote ?? null,
-                    internalNote: parsed.internalNote ?? prev?.internalNote ?? null,
-                  }))
-                }
-              }
-            }
-          } catch {
-            // Continue accumulating
-          }
+          // JSON not complete yet, continue streaming
         }
       }
     } catch (err) {
