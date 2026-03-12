@@ -47,7 +47,7 @@ Example: Customer had login issues. Reset password. Browser cache problem. Fixed
               value={draftNote}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value.length <= 100) {
+                if (value.length <= 250) {
                   setDraftNote(value);
                 }
               }}
